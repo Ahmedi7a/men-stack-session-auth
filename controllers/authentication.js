@@ -32,9 +32,17 @@ async function addUser(req, res) {
     const hashedPassword = bcrypt.hashSync(req.body.password, 10); //takes the normal p and give it 10 reandom hash
     req.body.password = hashedPassword;
     const user = await User.create(req.body)
-    console.log('new user', user)
-    return res.send(`Thanks for signing up ${user.username}`)
 
+    //once you sign up you get signed in
+    req.session.user = {
+        username: user.username,
+    }
+
+    // if everything is ok
+    req.session.save(()=> {
+      res.redirect('/')  
+    })
+    
 }
 
 //signin page
@@ -83,11 +91,7 @@ function signOut(req, res) {
 
 //vip room, if logged in you can access, if not no
 function welcome (req,res){
-    if(req.session.user){
-        res.send('welcome to party')
-    }else{
-        res.send('Sorry, no guests allowed')
-    }
+   res.send(`Welcome to the party ${req.session.user.username}.`);
 }
 
 
