@@ -25,8 +25,17 @@ const authCotroller = require('./controllers/authentication.js')
 //home page
 app.get('/', authCotroller.home);
 
-//signup
+//signup page
 app.get('/auth/sign-up', authCotroller.signUp)
+
+//post sign up
+app.post('/auth/sign-up',authCotroller.addUser)
+
+//sign in page
+app.get('/auth/sign-in', authCotroller.signInForm)
+
+//sign in post
+app.post('/auth/sign-in', authCotroller.signIn)
 
 
 
