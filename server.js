@@ -3,6 +3,8 @@ require('./config/database')
 const express = require("express");
 const methodOverride = require("method-override"); // new
 const app = express();
+const session = require('express-session');// for session
+const MongoStore= require('connect-mongo');// to store session in mongo
 const morgan = require('morgan');
 const path = require("path");
 
@@ -16,6 +18,23 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public"))); //css
+//session
+app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: true,
+      store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        ttl: 7* 24 * 60 * 60 // 1 week in seconds
+      }),
+      cookie:{
+        maxAge: 7* 24 * 60 * 60 * 1000, // 1 week in millesecond
+        httpOnly: true,
+        secure: false,
+      }
+    })
+  );
 
 //import controller
 const authCotroller = require('./controllers/authentication.js')
@@ -37,7 +56,11 @@ app.get('/auth/sign-in', authCotroller.signInForm)
 //sign in post
 app.post('/auth/sign-in', authCotroller.signIn)
 
+//sign out page and kill session
+app.get('/auth/sign-out', authCotroller.signOut);
 
+//vip
+app.get('/vip-lounge', authCotroller.welcome)
 
 
 //=============================================

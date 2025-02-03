@@ -56,16 +56,39 @@ async function signIn(req, res) {
     }
     //checking password.
     const validPassword = bcrypt.compareSync(req.body.password, userInDatabase.password) //compare real p with hash in db
-    if(!validPassword){
+    if (!validPassword) {
         return res.render('auth/sign-in.ejs', {
             title: "Sign in",
             msg: "Invalid password. try again"
         })
     }
+    req.session.user = {
+        username: userInDatabase.username,
+    }
 
-
+    // if everything is ok
+    req.session.save(()=> {
+      res.redirect('/')  
+    })
+    
 }
 
+//sign out page
+function signOut(req, res) {
+    req.session.destroy(() => {
+        res.clearCookie('connect.sid')
+        res.redirect('/')
+    })
+}
+
+//vip room, if logged in you can access, if not no
+function welcome (req,res){
+    if(req.session.user){
+        res.send('welcome to party')
+    }else{
+        res.send('Sorry, no guests allowed')
+    }
+}
 
 
 //=========================
@@ -75,4 +98,6 @@ module.exports = {
     addUser,
     signInForm,
     signIn,
+    signOut,
+    welcome,
 }
